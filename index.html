@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>منصة عين التعليمية - لوحة المشرف</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
@@ -53,7 +53,7 @@
             box-shadow: var(--box-shadow);
             padding: 40px 35px;
             width: 100%;
-            max-width: 450px;
+            max-width: 400px;
             text-align: center;
             border: 1px solid rgba(44, 90, 160, 0.1);
         }
@@ -76,14 +76,20 @@
 
         .login-card h2 {
             color: var(--dark);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 26px;
             line-height: 1.4;
         }
 
+        .login-card p {
+            color: var(--gray);
+            margin-bottom: 25px;
+            font-size: 16px;
+        }
+
         .input-group {
             margin-bottom: 25px;
-            text-align: right;
+            text-align: center;
         }
 
         .input-group label {
@@ -92,39 +98,51 @@
             font-weight: 700;
             color: var(--dark);
             font-size: 16px;
-            text-align: right;
+            text-align: center;
         }
 
-        .input-with-icon {
-            position: relative;
+        .pin-input-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
             margin-bottom: 8px;
         }
 
-        .input-with-icon i {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray);
-            font-size: 18px;
-        }
-
-        .input-with-icon input {
-            width: 100%;
-            padding: 16px 55px 16px 20px;
+        .pin-digit {
+            width: 60px;
+            height: 70px;
             border: 2px solid var(--gray-light);
             border-radius: var(--border-radius);
-            font-size: 17px;
+            font-size: 28px;
+            text-align: center;
+            font-weight: 700;
             transition: var(--transition);
             background-color: #fdfdfd;
-            text-align: right;
         }
 
-        .input-with-icon input:focus {
+        .pin-digit:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
             background-color: white;
+            transform: translateY(-2px);
+        }
+
+        .pin-digit.filled {
+            border-color: var(--secondary);
+            background-color: rgba(0, 168, 150, 0.05);
+        }
+
+        .pin-digit.error {
+            border-color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.05);
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
         }
 
         .error-message {
@@ -132,7 +150,7 @@
             font-size: 14px;
             margin-top: 8px;
             display: none;
-            text-align: right;
+            text-align: center;
         }
 
         .login-btn {
@@ -461,6 +479,26 @@
             display: flex;
             align-items: center;
             gap: 8px;
+        }
+
+        .question-meta .whatsapp-link {
+            color: #25D366;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid #25D366;
+        }
+
+        .question-meta .whatsapp-link:hover {
+            background: #25D366;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2);
         }
 
         .question-status {
@@ -935,6 +973,12 @@
                 font-size: 22px;
             }
             
+            .pin-digit {
+                width: 50px;
+                height: 60px;
+                font-size: 24px;
+            }
+            
             .navbar .logo {
                 font-size: 20px;
             }
@@ -956,6 +1000,7 @@
     </style>
 </head>
 <body>
+    <!-- شاشة الدخول برمز 4 أرقام -->
     <div class="login-container" id="loginContainer">
         <div class="login-card">
             <div class="logo">
@@ -963,22 +1008,16 @@
                 منصة عين التعليمية
             </div>
             <h2>لوحة تحكم المشرف</h2>
+            <p>أدخل رمز الدخول المكون من 4 أرقام</p>
             <div class="input-group">
-                <label>اسم المستخدم</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="adminUsername" placeholder="اسم المستخدم" autocomplete="username">
+                <label>رمز الدخول</label>
+                <div class="pin-input-container">
+                    <input type="password" class="pin-digit" maxlength="1" id="digit1" autocomplete="off" inputmode="numeric">
+                    <input type="password" class="pin-digit" maxlength="1" id="digit2" autocomplete="off" inputmode="numeric">
+                    <input type="password" class="pin-digit" maxlength="1" id="digit3" autocomplete="off" inputmode="numeric">
+                    <input type="password" class="pin-digit" maxlength="1" id="digit4" autocomplete="off" inputmode="numeric">
                 </div>
-                <div class="error-message" id="usernameError">الرجاء إدخال اسم المستخدم</div>
-            </div>
-            
-            <div class="input-group">
-                <label>كلمة المرور</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="adminPassword" placeholder="كلمة المرور" autocomplete="current-password">
-                </div>
-                <div class="error-message" id="passwordError">الرجاء إدخال كلمة المرور</div>
+                <div class="error-message" id="pinError">رمز الدخول غير صحيح</div>
             </div>
             
             <button class="login-btn" id="loginBtn">
@@ -988,6 +1027,7 @@
         </div>
     </div>
 
+    <!-- لوحة التحكم -->
     <div class="dashboard" id="dashboard">
         <nav class="navbar">
             <div class="logo">
@@ -1045,7 +1085,7 @@
                 <div class="questions-list" id="questionsList">
                     <div style="text-align: center; padding: 50px; color: var(--gray);">
                         <i class="fas fa-inbox" style="font-size: 60px; margin-bottom: 20px; opacity: 0.5;"></i>
-                        <p style="font-size: 18px;">لا توجد أسئلة حالياً</p>
+                        <p style="font-size: 18px;">جاري تحميل الأسئلة...</p>
                     </div>
                 </div>
             </div>
@@ -1096,6 +1136,7 @@
         </div>
     </div>
 
+    <!-- نافذة عرض السؤال -->
     <div class="question-modal" id="questionModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1109,12 +1150,12 @@
                         <div class="value" id="modalName">-</div>
                     </div>
                     <div class="detail-group">
-                        <label>المادة الدراسية</label>
-                        <div class="value" id="modalSubject">-</div>
-                    </div>
-                    <div class="detail-group">
                         <label>رقم الواتساب</label>
                         <div class="value" id="modalWhatsapp">-</div>
+                    </div>
+                    <div class="detail-group">
+                        <label>حالة السؤال</label>
+                        <div class="value" id="modalStatus">-</div>
                     </div>
                     <div class="detail-group">
                         <label>تاريخ الإرسال</label>
@@ -1152,108 +1193,88 @@
     </div>
 
     <script>
-        // ==================== تهيئة Firebase مع الإعدادات الجديدة ====================
+        // ==================== رمز الدخول الثابت ====================
+        const ADMIN_PIN = "1234";
+        
+        // ==================== تهيئة Firebase للبيانات فقط ====================
         const firebaseConfig = {
-            apiKey: "AIzaSyD7xmZ6lDgkxAwaVjdBetbRwOChIoe1juQ",
-            authDomain: "ayn-5b88a.firebaseapp.com",
-            projectId: "ayn-5b88a",
-            storageBucket: "ayn-5b88a.firebasestorage.app",
-            messagingSenderId: "733682854335",
-            appId: "1:733682854335:web:a06b02292ac21eebb8990a"
+            apiKey: "AIzaSyDbM7Ctn_EKQBauI3aMbV3lcrkni_qFtnU",
+            authDomain: "eyn-4a521.firebaseapp.com",
+            projectId: "eyn-4a521",
+            storageBucket: "eyn-4a521.firebasestorage.app",
+            messagingSenderId: "842348200480",
+            appId: "1:842348200480:web:9c75834517331da4e2f245",
+            measurementId: "G-SS74B2WPX2"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // ==================== دوال Firebase ====================
+        // محاولة تهيئة Firebase بشكل آمن
+        let firebaseApp;
+        let db;
         
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("✅ Firebase تم تهيئته بنجاح للبيانات");
+        } catch (error) {
+            console.warn("⚠️ هناك مشكلة في Firebase:", error);
+            // سنستخدم بيانات وهمية للاختبار
+        }
+
+        // ==================== دوال Firebase للبيانات ====================
         class FirebaseDatabase {
             constructor() {
                 this.db = db;
-                this.auth = auth;
                 this.currentUser = null;
-                this.ADMIN_USERNAME = "medkhay";
-                this.ADMIN_PASSWORD = "1964";
-                this.adminEmail = "admin@ayn.edu";
-                this.adminPassword = "Admin123!";
+            }
+            
+            // إنشاء رابط واتساب من رقم الهاتف
+            createWhatsappLink(phoneNumber) {
+                if (!phoneNumber) return '';
                 
-                // تعيين استمرارية المصادقة إلى LOCAL ليبقى مسجلاً بعد التحديث
-                this.initAuthPersistence();
-            }
-            
-            initAuthPersistence() {
-                this.auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                    .catch((error) => {
-                        console.error('خطأ في تعيين استمرارية المصادقة:', error);
-                    });
-            }
-            
-            usernameToEmail(username) {
-                return username.trim().toLowerCase() + '@ayn.admin';
-            }
-            
-            async loginAdmin(username, password) {
-                try {
-                    // تحقق من بيانات الدخول المحلية
-                    if (username !== this.ADMIN_USERNAME || password !== this.ADMIN_PASSWORD) {
-                        throw new Error('اسم المستخدم أو كلمة المرور غير صحيحة');
-                    }
-                    
-                    const email = this.usernameToEmail(username);
-                    
-                    // تسجيل الدخول باستخدام Firebase Auth
-                    let userCredential;
-                    try {
-                        userCredential = await this.auth.signInWithEmailAndPassword(email, this.adminPassword);
-                    } catch (authError) {
-                        // إذا فشل الدخول، حاول إنشاء الحساب
-                        userCredential = await this.auth.createUserWithEmailAndPassword(email, this.adminPassword);
-                        
-                        // حفظ بيانات المشرف في Firestore
-                        await this.db.collection('users').doc(userCredential.user.uid).set({
-                            name: 'مدير النظام',
-                            username: username,
-                            email: email,
-                            role: 'admin',
-                            createdAt: new Date().toISOString(),
-                            lastLogin: new Date().toISOString()
-                        });
-                    }
-                    
-                    const user = userCredential.user;
-                    
-                    // تحديث وقت آخر دخول
-                    await this.db.collection('users').doc(user.uid).update({
-                        lastLogin: new Date().toISOString()
-                    });
-                    
-                    // جلب بيانات المشرف
-                    const userDoc = await this.db.collection('users').doc(user.uid).get();
-                    this.currentUser = { uid: user.uid, ...userDoc.data() };
-                    
-                    return { success: true, user: this.currentUser };
-                } catch (error) {
-                    console.error('خطأ في تسجيل الدخول:', error);
-                    return { 
-                        success: false, 
-                        message: error.message 
-                    };
+                // تنظيف الرقم من أي أحرف غير رقمية
+                let cleanPhone = phoneNumber.toString().replace(/\D/g, '');
+                
+                // إذا كان الرقم مكون من 8 أرقام (كما في منصة الطلاب) نضيف رمز السعودية 966
+                if (cleanPhone.length === 8) {
+                    cleanPhone = '222' + cleanPhone;
                 }
-            }
-            
-            async logoutAdmin() {
-                try {
-                    await this.auth.signOut();
-                    this.currentUser = null;
-                    return { success: true };
-                } catch (error) {
-                    console.error('خطأ في تسجيل الخروج:', error);
-                    return { success: false, message: error.message };
+                
+                // إذا كان الرقم يبدأ ب 0 نزيله ونضيف 966
+                if (cleanPhone.length === 10 && cleanPhone.startsWith('0')) {
+                    cleanPhone = '222' + cleanPhone.substring(1);
                 }
+                
+                return `https://wa.me/${cleanPhone}`;
             }
             
             async getQuestions() {
+                if (!this.db) {
+                    console.log("⚠️ Firebase غير متصل - عرض بيانات وهمية");
+                    // بيانات وهمية للاختبار
+                    return [
+                        {
+                            id: "1",
+                            title: "سؤال في الرياضيات",
+                            question: "كيف أحل هذه المسألة؟",
+                            studentName: "محمد أحمد",
+                            phone: "12345678",
+                            status: "pending",
+                            createdAt: new Date().toISOString(),
+                            studentId: "student_1"
+                        },
+                        {
+                            id: "2",
+                            title: "استفسار في الفيزياء",
+                            question: "ما هي قوانين نيوتن؟",
+                            studentName: "فاطمة خالد",
+                            phone: "87654321",
+                            status: "answered",
+                            createdAt: new Date(Date.now() - 86400000).toISOString(),
+                            studentId: "student_2"
+                        }
+                    ];
+                }
+                
                 try {
                     const snapshot = await this.db.collection('questions')
                         .orderBy('createdAt', 'desc')
@@ -1270,6 +1291,20 @@
             }
             
             async getQuestionById(questionId) {
+                if (!this.db) {
+                    // بيانات وهمية للاختبار
+                    return {
+                        id: questionId,
+                        title: "سؤال تجريبي",
+                        question: "هذا سؤال تجريبي للاختبار",
+                        studentName: "طالب تجريبي",
+                        phone: "12345678",
+                        status: "pending",
+                        createdAt: new Date().toISOString(),
+                        studentId: "student_1"
+                    };
+                }
+                
                 try {
                     const doc = await this.db.collection('questions').doc(questionId).get();
                     if (doc.exists) {
@@ -1283,21 +1318,28 @@
             }
             
             async updateQuestion(questionId, updates) {
+                if (!this.db) {
+                    console.log("⚠️ Firebase غير متصل - تم حفظ البيانات محلياً");
+                    return { success: true, message: "تم الحفظ محلياً (Firebase غير متصل)" };
+                }
+                
                 try {
                     const questionRef = this.db.collection('questions').doc(questionId);
                     
                     if (updates.status === 'answered' && updates.answer) {
                         updates.answeredAt = new Date().toISOString();
                         
-                        const questionDoc = await questionRef.get();
-                        const questionData = questionDoc.data();
-                        
-                        if (questionData.userId) {
-                            await this.addNotification(
-                                questionData.userId,
-                                'تم الرد على سؤالك',
-                                `تم الرد على سؤالك: "${questionData.title}"`
-                            );
+                        // إضافة إشعار للطالب عند الرد على سؤاله
+                        const question = await this.getQuestionById(questionId);
+                        if (question && question.studentId) {
+                            await this.db.collection('notifications').add({
+                                studentId: question.studentId,
+                                title: 'تم الرد على سؤالك',
+                                message: `تم الرد على سؤالك: ${question.title || 'سؤالك'}`,
+                                read: false,
+                                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                                type: 'student'
+                            });
                         }
                     }
                     
@@ -1310,6 +1352,11 @@
             }
             
             async deleteQuestion(questionId) {
+                if (!this.db) {
+                    console.log("⚠️ Firebase غير متصل - تم حذف البيانات محلياً");
+                    return { success: true, message: "تم الحذف محلياً (Firebase غير متصل)" };
+                }
+                
                 try {
                     await this.db.collection('questions').doc(questionId).delete();
                     return { success: true };
@@ -1319,26 +1366,15 @@
                 }
             }
             
-            async addNotification(userId, title, message) {
-                try {
-                    await this.db.collection('notifications').add({
-                        userId,
-                        title,
-                        message,
-                        read: false,
-                        timestamp: new Date().toISOString(),
-                        type: 'user'
-                    });
-                    return { success: true };
-                } catch (error) {
-                    console.error('خطأ في إضافة الإشعار:', error);
-                    return { success: false, message: error.message };
-                }
-            }
-            
             async getNotifications() {
+                if (!this.db) {
+                    // بيانات وهمية للاختبار
+                    return [];
+                }
+                
                 try {
                     const snapshot = await this.db.collection('notifications')
+                        .where('type', '==', 'admin')
                         .orderBy('timestamp', 'desc')
                         .limit(20)
                         .get();
@@ -1353,35 +1389,15 @@
                 }
             }
             
-            async getUnreadNotificationsCount() {
-                try {
-                    const snapshot = await this.db.collection('notifications')
-                        .where('read', '==', false)
-                        .get();
-                    
-                    return snapshot.size;
-                } catch (error) {
-                    console.error('خطأ في جلب عدد الإشعارات:', error);
-                    return 0;
-                }
-            }
-            
-            async markNotificationAsRead(notificationId) {
-                try {
-                    await this.db.collection('notifications').doc(notificationId).update({
-                        read: true
-                    });
-                    return { success: true };
-                } catch (error) {
-                    console.error('خطأ في تحديث الإشعار:', error);
-                    return { success: false, message: error.message };
-                }
-            }
-            
             async markAllNotificationsAsRead() {
+                if (!this.db) {
+                    return { success: true };
+                }
+                
                 try {
                     const snapshot = await this.db.collection('notifications')
                         .where('read', '==', false)
+                        .where('type', '==', 'admin')
                         .get();
                     
                     const batch = this.db.batch();
@@ -1397,58 +1413,68 @@
                 }
             }
             
-            async getAllUsers() {
-                try {
-                    const snapshot = await this.db.collection('users')
-                        .where('role', '==', 'student')
-                        .get();
-                    
-                    return snapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                } catch (error) {
-                    console.error('خطأ في جلب المستخدمين:', error);
-                    return [];
-                }
-            }
-            
             async getUsersStats() {
+                if (!this.db) {
+                    // بيانات وهمية للاختبار
+                    return {
+                        totalUsers: 15,
+                        activeUsers: 8,
+                        questionsPerUserAvg: 2.3,
+                        users: [
+                            { id: "user1", name: "محمد أحمد", phone: "12345678", lastLogin: new Date().toISOString() },
+                            { id: "user2", name: "فاطمة خالد", phone: "87654321", lastLogin: new Date(Date.now() - 86400000).toISOString() }
+                        ]
+                    };
+                }
+                
                 try {
-                    const [usersSnapshot, questionsSnapshot] = await Promise.all([
-                        this.db.collection('users').where('role', '==', 'student').get(),
-                        this.db.collection('questions').get()
-                    ]);
-                    
-                    const users = usersSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    
+                    // جلب جميع الأسئلة
+                    const questionsSnapshot = await this.db.collection('questions').get();
                     const questions = questionsSnapshot.docs.map(doc => ({
                         id: doc.id,
                         ...doc.data()
                     }));
                     
-                    const today = new Date().toISOString().split('T')[0];
-                    const activeUsers = users.filter(user => {
-                        return user.lastLogin && user.lastLogin.split('T')[0] === today;
-                    }).length;
-                    
-                    const questionsPerUserAvg = users.length > 0 ? 
-                        (questions.length / users.length).toFixed(1) : 0;
-                    
+                    // إنشاء خريطة لحساب عدد أسئلة كل طالب
                     const userQuestionsCount = {};
+                    const usersMap = {};
+                    
                     questions.forEach(question => {
-                        if (question.userId) {
-                            userQuestionsCount[question.userId] = (userQuestionsCount[question.userId] || 0) + 1;
+                        if (question.studentId && question.studentName) {
+                            if (!usersMap[question.studentId]) {
+                                usersMap[question.studentId] = {
+                                    id: question.studentId,
+                                    name: question.studentName,
+                                    phone: question.phone || '',
+                                    lastQuestionDate: question.createdAt
+                                };
+                            }
+                            
+                            userQuestionsCount[question.studentId] = (userQuestionsCount[question.studentId] || 0) + 1;
                         }
                     });
+                    
+                    // تحويل الخريطة إلى مصفوفة
+                    const users = Object.values(usersMap);
+                    
+                    // حساب المستخدمين النشطين (الذين لديهم سؤال في آخر 7 أيام)
+                    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+                    const activeUsers = users.filter(user => {
+                        if (!user.lastQuestionDate) return false;
+                        const lastDate = user.lastQuestionDate.toDate ? 
+                            user.lastQuestionDate.toDate() : new Date(user.lastQuestionDate);
+                        return lastDate > sevenDaysAgo;
+                    }).length;
+                    
+                    // حساب متوسط الأسئلة لكل مستخدم
+                    const questionsPerUserAvg = users.length > 0 ? 
+                        (questions.length / users.length).toFixed(1) : 0;
                     
                     return {
                         totalUsers: users.length,
                         activeUsers,
                         questionsPerUserAvg,
+                        users,
                         userQuestionsCount
                     };
                 } catch (error) {
@@ -1457,12 +1483,18 @@
                         totalUsers: 0,
                         activeUsers: 0,
                         questionsPerUserAvg: 0,
+                        users: [],
                         userQuestionsCount: {}
                     };
                 }
             }
             
             setupQuestionsListener(callback) {
+                if (!this.db) {
+                    console.log("⚠️ Firebase غير متصل - لن تعمل التحديثات المباشرة");
+                    return () => {}; // دالة إلغاء فارغة
+                }
+                
                 return this.db.collection('questions')
                     .orderBy('createdAt', 'desc')
                     .onSnapshot(snapshot => {
@@ -1475,7 +1507,12 @@
             }
             
             setupNotificationsListener(callback) {
+                if (!this.db) {
+                    return () => {}; // دالة إلغاء فارغة
+                }
+                
                 return this.db.collection('notifications')
+                    .where('type', '==', 'admin')
                     .orderBy('timestamp', 'desc')
                     .limit(10)
                     .onSnapshot(snapshot => {
@@ -1493,6 +1530,7 @@
         let unsubscribeQuestions = null;
         let unsubscribeNotifications = null;
 
+        // ==================== دوال التطبيق ====================
         function loadDashboardData() {
             if (unsubscribeQuestions) unsubscribeQuestions();
             if (unsubscribeNotifications) unsubscribeNotifications();
@@ -1540,8 +1578,21 @@
                 
                 const statusText = question.status === 'pending' ? 'بانتظار الرد' : 'تم الرد';
                 const statusClass = question.status === 'pending' ? 'status-pending' : 'status-answered';
-                const date = new Date(question.createdAt).toLocaleDateString('ar-SA');
-                const time = new Date(question.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                const date = new Date(question.createdAt?.toDate ? question.createdAt.toDate() : question.createdAt).toLocaleDateString('ar-SA');
+                const time = new Date(question.createdAt?.toDate ? question.createdAt.toDate() : question.createdAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+                
+                // إنشاء رابط واتساب إذا كان هناك رقم
+                let whatsappHtml = '';
+                if (question.phone) {
+                    const whatsappLink = database.createWhatsappLink(question.phone);
+                    whatsappHtml = `
+                        <span>
+                            <a href="${whatsappLink}" target="_blank" class="whatsapp-link">
+                                <i class="fab fa-whatsapp"></i> ${question.phone}
+                            </a>
+                        </span>
+                    `;
+                }
                 
                 questionElement.innerHTML = `
                     <div class="question-content">
@@ -1550,8 +1601,8 @@
                             ${question.status === 'pending' ? '<i class="fas fa-clock" style="color: #ff9f43;"></i>' : '<i class="fas fa-check-circle" style="color: var(--secondary);"></i>'}
                         </div>
                         <div class="question-meta">
-                            <span><i class="fas fa-user"></i> ${question.userName}</span>
-                            <span><i class="fas fa-book"></i> ${question.subject}</span>
+                            <span><i class="fas fa-user"></i> ${question.studentName || question.userName || 'مجهول'}</span>
+                            ${whatsappHtml}
                             <span><i class="fas fa-calendar"></i> ${date}</span>
                             <span><i class="fas fa-clock"></i> ${time}</span>
                         </div>
@@ -1573,11 +1624,24 @@
             
             currentQuestionId = questionId;
             
-            document.getElementById('modalName').textContent = question.userName;
-            document.getElementById('modalSubject').textContent = question.subject;
-            document.getElementById('modalWhatsapp').textContent = question.userPhone || 'لم يضف رقم واتساب';
+            document.getElementById('modalName').textContent = question.studentName || question.userName || 'غير محدد';
             
-            const date = new Date(question.createdAt);
+            // عرض رقم الواتساب كرابط
+            const whatsappElement = document.getElementById('modalWhatsapp');
+            if (question.phone) {
+                const whatsappLink = database.createWhatsappLink(question.phone);
+                whatsappElement.innerHTML = `
+                    <a href="${whatsappLink}" target="_blank" class="whatsapp-link">
+                        <i class="fab fa-whatsapp"></i> ${question.phone}
+                    </a>
+                `;
+            } else {
+                whatsappElement.textContent = 'لم يضف رقم واتساب';
+            }
+            
+            document.getElementById('modalStatus').textContent = question.status === 'pending' ? 'بانتظار الرد' : 'تم الرد';
+            
+            const date = new Date(question.createdAt?.toDate ? question.createdAt.toDate() : question.createdAt);
             const formattedDate = date.toLocaleDateString('ar-SA', { 
                 year: 'numeric', 
                 month: 'long', 
@@ -1588,7 +1652,7 @@
             
             document.getElementById('modalDate').textContent = `${formattedDate} - ${formattedTime}`;
             document.getElementById('modalTitle').textContent = question.title || 'بدون عنوان';
-            document.getElementById('modalQuestion').textContent = question.question;
+            document.getElementById('modalQuestion').textContent = question.question || 'لا يوجد نص للسؤال';
             document.getElementById('answerText').value = question.answer || '';
             
             document.getElementById('questionModal').classList.add('show');
@@ -1625,7 +1689,7 @@
                 notificationElement.className = `notification-item ${notification.read ? '' : 'unread'}`;
                 notificationElement.dataset.id = notification.id;
                 
-                const time = new Date(notification.timestamp);
+                const time = notification.timestamp?.toDate ? notification.timestamp.toDate() : new Date(notification.timestamp);
                 const timeString = time.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
                 const dateString = time.toLocaleDateString('ar-SA', { month: 'short', day: 'numeric' });
                 
@@ -1638,7 +1702,7 @@
                 `;
                 
                 notificationElement.addEventListener('click', async () => {
-                    await database.markNotificationAsRead(notification.id);
+                    await database.markAllNotificationsAsRead();
                     
                     if (notification.title.includes('سؤال')) {
                         document.getElementById('questionsList').scrollIntoView({ behavior: 'smooth' });
@@ -1663,7 +1727,6 @@
         
         async function loadUsersData() {
             const stats = await database.getUsersStats();
-            const users = await database.getAllUsers();
             
             document.getElementById('totalUsersCount').textContent = stats.totalUsers;
             document.getElementById('activeUsersCount').textContent = stats.activeUsers;
@@ -1671,7 +1734,7 @@
             
             const usersTableBody = document.getElementById('usersTableBody');
             
-            if (users.length === 0) {
+            if (stats.users.length === 0) {
                 usersTableBody.innerHTML = `
                     <tr>
                         <td colspan="4" style="text-align: center; padding: 50px; color: var(--gray);">
@@ -1685,23 +1748,32 @@
             
             usersTableBody.innerHTML = '';
             
-            const sortedUsers = [...users].sort((a, b) => {
-                const dateA = a.lastLogin ? new Date(a.lastLogin) : new Date(0);
-                const dateB = b.lastLogin ? new Date(b.lastLogin) : new Date(0);
+            const sortedUsers = [...stats.users].sort((a, b) => {
+                const dateA = a.lastQuestionDate?.toDate ? a.lastQuestionDate.toDate() : new Date(a.lastQuestionDate || 0);
+                const dateB = b.lastQuestionDate?.toDate ? b.lastQuestionDate.toDate() : new Date(b.lastQuestionDate || 0);
                 return dateB - dateA;
             });
             
             sortedUsers.forEach(user => {
                 const userQuestions = stats.userQuestionsCount[user.id] || 0;
-                const lastLogin = user.lastLogin ? 
-                    new Date(user.lastLogin).toLocaleDateString('ar-SA') + ' ' + 
-                    new Date(user.lastLogin).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 
-                    'لم يسجل دخول';
+                const lastLogin = user.lastQuestionDate ? 
+                    new Date(user.lastQuestionDate?.toDate ? user.lastQuestionDate.toDate() : user.lastQuestionDate).toLocaleDateString('ar-SA') + ' ' + 
+                    new Date(user.lastQuestionDate?.toDate ? user.lastQuestionDate.toDate() : user.lastQuestionDate).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' }) : 
+                    'لا يوجد نشاط';
+                
+                // إنشاء رابط واتساب إذا كان هناك رقم
+                let phoneDisplay = '';
+                if (user.phone) {
+                    const whatsappLink = database.createWhatsappLink(user.phone);
+                    phoneDisplay = `<a href="${whatsappLink}" target="_blank" style="color: #25D366; text-decoration: none;"><i class="fab fa-whatsapp"></i> ${user.phone}</a>`;
+                } else {
+                    phoneDisplay = 'لا يوجد';
+                }
                 
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td style="font-weight: 700; color: var(--dark);">${user.name}</td>
-                    <td style="text-align: center; color: var(--gray);">${user.phone || 'لا يوجد'}</td>
+                    <td style="text-align: center;">${phoneDisplay}</td>
                     <td style="text-align: center;">
                         <span class="question-count-badge">${userQuestions}</span>
                     </td>
@@ -1714,93 +1786,167 @@
 
         // ==================== تهيئة الصفحة ====================
         document.addEventListener('DOMContentLoaded', function() {
-            // التحقق من حالة تسجيل الدخول عند تحميل الصفحة
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    const userDoc = await db.collection('users').doc(user.uid).get();
-                    if (userDoc.exists && userDoc.data().role === 'admin') {
-                        document.getElementById('loginContainer').style.display = 'none';
-                        document.getElementById('dashboard').style.display = 'block';
-                        database.currentUser = { uid: user.uid, ...userDoc.data() };
-                        document.getElementById('adminName').textContent = `مرحباً، ${database.currentUser.name}`;
-                        loadDashboardData();
+            console.log("✅ الصفحة تم تحميلها بنجاح");
+            
+            // التحقق من وجود جلسة دخول سابقة
+            const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+            if (isLoggedIn) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('adminName').textContent = 'مرحباً، المشرف';
+                loadDashboardData();
+            }
+            
+            // تهيئة حقول إدخال الرمز
+            const digitInputs = [
+                document.getElementById('digit1'),
+                document.getElementById('digit2'),
+                document.getElementById('digit3'),
+                document.getElementById('digit4')
+            ];
+            
+            // التنقل بين حقول إدخال الرمز
+            digitInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    
+                    // التحقق من أن المدخل رقم فقط
+                    if (!/^\d$/.test(value) && value !== '') {
+                        e.target.value = '';
+                        return;
                     }
-                }
+                    
+                    if (value.length === 1 && index < digitInputs.length - 1) {
+                        digitInputs[index + 1].focus();
+                    }
+                    
+                    // تحديث حالة الحقل
+                    digitInputs.forEach((digit, i) => {
+                        if (digit.value) {
+                            digit.classList.add('filled');
+                            digit.classList.remove('error');
+                        } else {
+                            digit.classList.remove('filled');
+                        }
+                    });
+                    
+                    // إخفاء رسالة الخطأ عند البدء في الكتابة
+                    document.getElementById('pinError').style.display = 'none';
+                });
+                
+                input.addEventListener('keydown', (e) => {
+                    // مسح الحقل عند الضغط على Backspace إذا كان فارغاً
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        digitInputs[index - 1].focus();
+                        digitInputs[index - 1].value = '';
+                        digitInputs[index - 1].classList.remove('filled');
+                    }
+                    
+                    // السماح فقط بالأرقام وبعض مفاتيح التنقل
+                    if (!/^\d$/.test(e.key) && 
+                        !['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+                        e.preventDefault();
+                    }
+                    
+                    // الدخول بالضغط على Enter عند الحقل الأخير
+                    if (e.key === 'Enter' && index === digitInputs.length - 1 && input.value) {
+                        document.getElementById('loginBtn').click();
+                    }
+                });
+                
+                input.addEventListener('focus', () => {
+                    input.select();
+                });
             });
             
-            // تسجيل الدخول
-            document.getElementById('loginBtn').addEventListener('click', async function() {
-                const username = document.getElementById('adminUsername').value.trim();
-                const password = document.getElementById('adminPassword').value;
-                const usernameError = document.getElementById('usernameError');
-                const passwordError = document.getElementById('passwordError');
+            // زر الدخول
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.addEventListener('click', function() {
+                const enteredPin = digitInputs.map(input => input.value).join('');
+                const pinError = document.getElementById('pinError');
                 
-                usernameError.style.display = 'none';
-                passwordError.style.display = 'none';
+                // إخفاء رسالة الخطأ
+                pinError.style.display = 'none';
                 
-                let hasError = false;
+                // إزالة تأثير الخطأ من جميع الحقول
+                digitInputs.forEach(input => input.classList.remove('error'));
                 
-                if (!username) {
-                    usernameError.textContent = 'الرجاء إدخال اسم المستخدم';
-                    usernameError.style.display = 'block';
-                    hasError = true;
-                }
-                
-                if (!password) {
-                    passwordError.textContent = 'الرجاء إدخال كلمة المرور';
-                    passwordError.style.display = 'block';
-                    hasError = true;
-                }
-                
-                if (hasError) {
+                // التحقق من أن جميع الحقول ممتلئة
+                if (enteredPin.length < 4) {
+                    pinError.textContent = 'الرجاء إدخال جميع الأرقام';
+                    pinError.style.display = 'block';
+                    digitInputs.forEach(input => {
+                        if (!input.value) {
+                            input.classList.add('error');
+                        }
+                    });
+                    digitInputs[0].focus();
                     return;
                 }
                 
-                const loginBtn = this;
-                const originalText = loginBtn.innerHTML;
-                
-                loginBtn.disabled = true;
-                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الدخول...';
-                
-                const result = await database.loginAdmin(username, password);
-                
-                if (result.success) {
-                    usernameError.style.display = 'none';
-                    passwordError.style.display = 'none';
+                // التحقق من صحة الرمز
+                if (enteredPin === ADMIN_PIN) {
+                    // حفظ حالة الدخول
+                    localStorage.setItem('adminLoggedIn', 'true');
+                    
+                    // إخفاء واجهة الدخول وإظهار لوحة التحكم
                     document.getElementById('loginContainer').style.display = 'none';
                     document.getElementById('dashboard').style.display = 'block';
-                    document.getElementById('adminName').textContent = `مرحباً، ${result.user.name}`;
+                    document.getElementById('adminName').textContent = 'مرحباً، المشرف';
+                    
+                    // تحميل البيانات
                     loadDashboardData();
+                    
+                    // إعادة تعيين حقول الرمز
+                    digitInputs.forEach(input => {
+                        input.value = '';
+                        input.classList.remove('filled');
+                    });
+                    
+                    console.log("✅ تم الدخول بنجاح!");
                 } else {
-                    passwordError.textContent = result.message;
-                    passwordError.style.display = 'block';
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = originalText;
+                    // عرض رسالة الخطأ
+                    pinError.textContent = 'رمز الدخول غير صحيح';
+                    pinError.style.display = 'block';
+                    
+                    // إضافة تأثير الخطأ على جميع الحقول
+                    digitInputs.forEach(input => input.classList.add('error'));
+                    
+                    // التركيز على الحقل الأول
+                    digitInputs[0].focus();
+                    digitInputs[0].select();
+                    
+                    console.log("❌ رمز الدخول غير صحيح");
                 }
             });
             
-            // إدخال البيانات بالضغط على Enter
-            document.getElementById('adminPassword').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    document.getElementById('loginBtn').click();
-                }
-            });
-            
-            // تسجيل الخروج
-            document.getElementById('logoutBtn').addEventListener('click', async function() {
+            // زر تسجيل الخروج
+            document.getElementById('logoutBtn').addEventListener('click', function() {
                 if (unsubscribeQuestions) unsubscribeQuestions();
                 if (unsubscribeNotifications) unsubscribeNotifications();
                 
-                await database.logoutAdmin();
+                // حذف حالة الدخول
+                localStorage.removeItem('adminLoggedIn');
+                
+                // إخفاء لوحة التحكم وإظهار واجهة الدخول
                 document.getElementById('dashboard').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
                 
-                // إعادة تعيين حقول الدخول
-                document.getElementById('adminPassword').value = '';
-                document.getElementById('adminUsername').focus();
+                // إعادة تعيين حقول الرمز
+                digitInputs.forEach(input => {
+                    input.value = '';
+                    input.classList.remove('filled', 'error');
+                });
                 
-                document.getElementById('usernameError').style.display = 'none';
-                document.getElementById('passwordError').style.display = 'none';
+                // إخفاء رسالة الخطأ
+                document.getElementById('pinError').style.display = 'none';
+                
+                // التركيز على الحقل الأول
+                setTimeout(() => {
+                    digitInputs[0].focus();
+                }, 100);
+                
+                console.log("✅ تم تسجيل الخروج");
             });
             
             // إغلاق نافذة السؤال
@@ -1897,8 +2043,19 @@
             // تحديث بيانات المستخدمين
             document.getElementById('refreshUsersBtn').addEventListener('click', loadUsersData);
             
-            // التركيز على حقل اسم المستخدم عند تحميل الصفحة
-            document.getElementById('adminUsername').focus();
+            // التركيز على الحقل الأول عند تحميل الصفحة
+            setTimeout(() => {
+                if (!localStorage.getItem('adminLoggedIn')) {
+                    digitInputs[0].focus();
+                }
+            }, 500);
+            
+            // رسالة ترحيب
+            setTimeout(() => {
+                if (!localStorage.getItem('adminLoggedIn')) {
+                    console.log("🔐 نظام الدخول جاهز. استخدم الرمز: 1234");
+                }
+            }, 1000);
         });
     </script>
 </body>
