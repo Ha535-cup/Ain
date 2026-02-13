@@ -148,6 +148,19 @@
         @media (max-width:992px){ .navbar { flex-direction: column; gap:18px; align-items:flex-start; padding:20px; } .admin-info { width:100%; justify-content:space-between; } .notifications-dropdown { width:320px; right:-160px; } .modal-actions { flex-direction:column; } .user-stats-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:768px){ .stats-cards { grid-template-columns:1fr; } .question-item { flex-direction:column; align-items:flex-start; gap:18px; } .question-meta { flex-wrap:wrap; gap:15px; } .admin-info { flex-direction:column; align-items:flex-start; gap:15px; } .notifications-dropdown { width:280px; right:-140px; } .user-stats-grid { grid-template-columns:1fr; } .users-table th, .users-table td { padding:15px 10px; font-size:14px; } }
         @media (max-width:480px){ .login-card { padding:30px 20px; } .login-card .logo { font-size:28px; } .login-card h2 { font-size:22px; } .pin-digit { width:50px; height:60px; font-size:24px; } .navbar .logo { font-size:20px; } .stat-card { flex-direction:column; text-align:center; gap:18px; } .question-title { font-size:16px; } .users-section h2 { font-size:22px; } }
+
+        /* أنماط إضافية لبطاقة التبرعات */
+        .donation-stats {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .donation-stats .stat-info h3,
+        .donation-stats .stat-info p {
+            color: white;
+        }
+        .donation-stats .stat-icon {
+            background: rgba(255,255,255,0.2);
+        }
     </style>
 </head>
 <body>
@@ -199,6 +212,7 @@
         </nav>
 
         <div class="container">
+            <!-- إحصائيات الأسئلة -->
             <div class="stats-cards">
                 <div class="stat-card">
                     <div class="stat-icon pending"><i class="fas fa-clock"></i></div>
@@ -211,6 +225,31 @@
                 <div class="stat-card">
                     <div class="stat-icon total"><i class="fas fa-question-circle"></i></div>
                     <div class="stat-info"><h3 id="totalCount">0</h3><p>إجمالي الأسئلة</p></div>
+                </div>
+            </div>
+
+            <!-- إحصائيات التبرعات -->
+            <div class="stats-cards">
+                <div class="stat-card donation-stats">
+                    <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <div class="stat-info">
+                        <h3 id="bankilyClicks">0</h3>
+                        <p>نقرات بنكيلي</p>
+                    </div>
+                </div>
+                <div class="stat-card donation-stats">
+                    <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <div class="stat-info">
+                        <h3 id="sadadClicks">0</h3>
+                        <p>نقرات السداد</p>
+                    </div>
+                </div>
+                <div class="stat-card donation-stats">
+                    <div class="stat-icon"><i class="fas fa-hand-holding-heart"></i></div>
+                    <div class="stat-info">
+                        <h3 id="masrafiClicks">0</h3>
+                        <p>نقرات مصرفي</p>
+                    </div>
                 </div>
             </div>
 
@@ -312,6 +351,7 @@
                 this.currentQuestionId = null;
                 this.unsubscribeQuestions = null;
                 this.unsubscribeNotifications = null;
+                this.unsubscribeDonationClicks = null;
             }
 
             createWhatsappLink(phoneNumber) {
@@ -336,7 +376,6 @@
                 }
             }
 
-            // ✅ الإصدار النهائي الصحيح - بدون serverTimestamp() داخل arrayUnion
             async addReply(questionId, content) {
                 try {
                     if (!content.trim()) throw new Error('الرد فارغ');
@@ -344,26 +383,23 @@
                     const questionDoc = await questionRef.get();
                     if (!questionDoc.exists) throw new Error('السؤال غير موجود');
 
-                    // ❌ لا تستخدم serverTimestamp() هنا - استخدم Timestamp.now()
                     const reply = {
                         id: `reply_${Date.now()}_${Math.random()}`,
                         senderId: 'admin',
                         senderName: 'المشرف',
                         senderRole: 'admin',
                         content: content.trim(),
-                        timestamp: firebase.firestore.Timestamp.now(), // ✅ يعمل مع arrayUnion
+                        timestamp: firebase.firestore.Timestamp.now(),
                         readByAdmin: true,
                         readByStudent: false
                     };
 
-                    // تحديث الردود وحالة السؤال
                     await questionRef.update({
                         replies: firebase.firestore.FieldValue.arrayUnion(reply),
                         status: 'answered',
-                        answeredAt: firebase.firestore.FieldValue.serverTimestamp() // ✅ هذا مسموح به
+                        answeredAt: firebase.firestore.FieldValue.serverTimestamp()
                     });
 
-                    // محاولة إضافة إشعار للطالب (معزولة - لا تؤثر على نجاح العملية)
                     const question = questionDoc.data();
                     if (question && question.studentId && question.studentName) {
                         try {
@@ -389,7 +425,6 @@
                 }
             }
 
-            // ✅ استخدام Transaction لتحديث علامات القراءة
             async markRepliesAsReadByAdmin(questionId) {
                 try {
                     const questionRef = this.db.collection('questions').doc(questionId);
@@ -485,6 +520,21 @@
                 }
             }
 
+            // مستمع لإحصائيات التبرعات
+            setupDonationClicksListener(callback) {
+                if (!this.db) return () => {};
+                if (this.unsubscribeDonationClicks) this.unsubscribeDonationClicks();
+                this.unsubscribeDonationClicks = this.db.collection('donationClicks').doc('stats')
+                    .onSnapshot(doc => {
+                        if (doc.exists) {
+                            callback(doc.data());
+                        } else {
+                            callback({ bankily: 0, sadad: 0, masrafi: 0 });
+                        }
+                    });
+                return this.unsubscribeDonationClicks;
+            }
+
             setupQuestionsListener(callback) {
                 if (!this.db) return () => {};
                 if (this.unsubscribeQuestions) this.unsubscribeQuestions();
@@ -519,6 +569,7 @@
         function loadDashboardData() {
             if (adminSystem.unsubscribeQuestions) adminSystem.unsubscribeQuestions();
             if (adminSystem.unsubscribeNotifications) adminSystem.unsubscribeNotifications();
+            if (adminSystem.unsubscribeDonationClicks) adminSystem.unsubscribeDonationClicks();
 
             adminSystem.setupQuestionsListener(questions => {
                 const pending = questions.filter(q => q.status === 'pending').length;
@@ -533,6 +584,12 @@
                 const unread = notifications.filter(n => !n.read).length;
                 updateNotificationsBadge(unread);
                 renderNotificationsDropdown(notifications);
+            });
+
+            adminSystem.setupDonationClicksListener(data => {
+                document.getElementById('bankilyClicks').textContent = data.bankily || 0;
+                document.getElementById('sadadClicks').textContent = data.sadad || 0;
+                document.getElementById('masrafiClicks').textContent = data.masrafi || 0;
             });
 
             loadUsersData();
@@ -786,6 +843,7 @@
             document.getElementById('logoutBtn').addEventListener('click', function() {
                 if (adminSystem.unsubscribeQuestions) adminSystem.unsubscribeQuestions();
                 if (adminSystem.unsubscribeNotifications) adminSystem.unsubscribeNotifications();
+                if (adminSystem.unsubscribeDonationClicks) adminSystem.unsubscribeDonationClicks();
                 localStorage.removeItem('adminLoggedIn');
                 document.getElementById('dashboard').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
